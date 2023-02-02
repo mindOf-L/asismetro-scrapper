@@ -16,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,7 +75,6 @@ public class Main {
         HttpResponse<String> responsePost = httpClient.send(requestPost, HttpResponse.BodyHandlers.ofString());
 
         System.out.println("Login: " + responsePost.statusCode());
-        //System.out.println(responsePost.body());
 
         origin = "".concat(nextUrl);
         nextUrl = "https://asismetro.org/t_colaboraciones_ppam_view.php";
@@ -108,9 +108,6 @@ public class Main {
                     .build();
 
             responsePost = httpClient.send(requestPost, HttpResponse.BodyHandlers.ofString());
-
-            //System.out.println(responsePost.statusCode());
-            //System.out.println(responsePost.body());
 
             Pattern pattern = Pattern.compile(stringPattern);
             Matcher matcher = pattern.matcher(responsePost.body());
@@ -175,9 +172,6 @@ public class Main {
         nextUrl = "https://asismetro.org/t_voluntarios_view.php";
 
         File file = new File("brothers.csv");
-        /*if (!file.exists()){
-            file.createNewFile();
-        }*/
         FileWriter writer = new FileWriter(file);
         writer.write("Nombre,Email,Teléfono,Turno 1,Turno 2,Turno 3,Turno 4\n");
 
@@ -346,17 +340,26 @@ public class Main {
         Matcher matcher = pattern.matcher(csv.toString());
 
         Map<String, String> shifts = new TreeMap<>();
-        shifts.put("Turno 1", "");
-        shifts.put("Turno 2", "");
-        shifts.put("Turno 3", "");
-        shifts.put("Turno 4", "");
+        shifts.put("Turno 1", "0000000");
+        shifts.put("Turno 2", "0000000");
+        shifts.put("Turno 3", "0000000");
+        shifts.put("Turno 4", "0000000");
+        String days ="LMXJVSD";
+
         while (matcher.find()) {
             String[] shift = matcher.group().split(",");
-            if(shifts.get(shift[2]).equals(""))
-                shifts.replace(shift[2], getInitialFromDay(shift[1]));
-            else
-                shifts.replace(shift[2], String.format("%s,%s", shifts.get(shift[2]),getInitialFromDay(shift[1])));
+            String initial = getInitialFromDay(shift[1]);
+            int dayPosition = days.indexOf(initial);
+            StringBuilder shiftString = new StringBuilder(shifts.get(shift[2]));
+            shiftString.setCharAt(dayPosition, initial.toCharArray()[0]);
+            shifts.replace(shift[2], shiftString.toString());
         }
+
+        shifts.replace("Turno 1", String.join(",",shifts.get("Turno 1").replace("0", "").split("")));
+        shifts.replace("Turno 2", String.join(",",shifts.get("Turno 2").replace("0", "").split("")));
+        shifts.replace("Turno 3", String.join(",",shifts.get("Turno 3").replace("0", "").split("")));
+        shifts.replace("Turno 4", String.join(",",shifts.get("Turno 4").replace("0", "").split("")));
+
         System.out.println(shifts);
         return shifts;
 
@@ -364,13 +367,13 @@ public class Main {
 
     private static String getInitialFromDay(String day){
         switch (day) {
-            case "Lunes" -> { return "L"; }
-            case "Martes" -> { return "M"; }
+            case "Lunes"     -> { return "L"; }
+            case "Martes"    -> { return "M"; }
             case "Miércoles" -> { return "X"; }
-            case "Jueves" -> { return "J"; }
-            case "Viernes" -> { return "S"; }
-            case "Sábado" -> { return "V"; }
-            case "Domingo" -> { return "D"; }
+            case "Jueves"    -> { return "J"; }
+            case "Viernes"   -> { return "S"; }
+            case "Sábado"    -> { return "V"; }
+            case "Domingo"   -> { return "D"; }
         }
         return "";
     }
