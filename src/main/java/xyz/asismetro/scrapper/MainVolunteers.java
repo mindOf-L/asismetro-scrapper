@@ -16,7 +16,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,7 +24,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Main {
+public class MainVolunteers {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -77,10 +76,13 @@ public class Main {
         System.out.println("Login: " + responsePost.statusCode());
 
         origin = "".concat(nextUrl);
-        nextUrl = "https://asismetro.org/t_colaboraciones_ppam_view.php";
-        // post navigate to Colaboraciones and filter by IFEMA
+        nextUrl = "https://asismetro.org/t_voluntarios_view.php";
 
-        Set<Integer> brothersColab = new HashSet<>();
+        // post navigate to Volunteers and filter by IFEMA
+        // post (get user id from colab id)
+
+        Set<Integer> brotherIDs = new HashSet<>();
+
 
         String stringPattern = "document.myform.SelectedID.value='(?<id>[0-9]+)'";
 
@@ -93,6 +95,7 @@ public class Main {
             data.put("SearchString", "ifema");
             //data.put("Search_x", "1");
             data.put("FirstRecord", currentRecord); // first page = 1, consecutive with +20
+            data.put("SortDirection", "desc");
             data.put("NoDV", "1");
             data.put("DisplayRecords", "all");
 
@@ -113,7 +116,7 @@ public class Main {
             Matcher matcher = pattern.matcher(responsePost.body());
 
             while (matcher.find())
-                brothersColab.add(Integer.parseInt(matcher.group("id")));
+                brotherIDs.add(Integer.parseInt(matcher.group("id")));
 
             String stringPatternPages = "Registro [0-9] de [0-9]+ a (?<total>[0-9]+)";
             pattern = Pattern.compile(stringPatternPages);
@@ -128,44 +131,6 @@ public class Main {
             currentRecord += 20;
 
         } while (i <= totalPages);
-
-        // post (get user id from colab id)
-
-        Set<Integer> brotherIDs = new HashSet<>();
-
-        for(Integer colabId : brothersColab) {
-            data.clear();
-            data.put("current_view", "TV");
-            data.put("SearchString", "ifema");
-            data.put("SelectedID", colabId);
-            data.put("SelectedField", "1");
-            data.put("FirstRecord", 1);
-            data.put("NoDV", "1");
-            data.put("DisplayRecords", "all");
-
-            requestPost = HttpRequest.newBuilder()
-                    .POST(buildFormDataFromMap(data))
-                    .uri(URI.create(nextUrl))
-                    .setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("DNT", "1")
-                    .header("Origin", origin)
-                    .header("Referer", origin)
-                    .header("Cookie", cookie)
-                    .build();
-
-            responsePost = httpClient.send(requestPost, HttpResponse.BodyHandlers.ofString());
-
-            stringPattern = "IdVoluntario\" value=\"(?<broId>[0-9]+)\"";
-            Pattern pattern = Pattern.compile(stringPattern);
-            Matcher matcher = pattern.matcher(responsePost.body());
-
-            while (matcher.find())
-                brotherIDs.add(Integer.parseInt(matcher.group("broId")));
-
-            //break; // temp to test
-
-        }
 
         // post (get details from Volunteer)
         origin = "https://asismetro.org";
@@ -307,6 +272,7 @@ public class Main {
             brothers.add(brother);
 
             System.out.println(brother);
+            System.out.println(String.format("Completed %s of %s", brothers.size(), brotherIDs.size()));
 
             // write on file
             writer.write(String.format("%s,%s,%s,\"%s\",\"%s\",\"%s\",\"%s\"\n",
