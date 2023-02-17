@@ -275,7 +275,7 @@ public class MainVolunteers {
             System.out.println(String.format("Completed %s of %s", brothers.size(), brotherIDs.size()));
 
             // write on file
-            writer.write(String.format("%s,%s,%s,\"%s\",\"%s\",\"%s\",\"%s\"\n",
+            writer.write(String.format("\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"\n",
                     brother.getName(),
                     brother.getEmail(),
                     brother.getPhone(),
