@@ -324,7 +324,7 @@ public class MainCollab {
         writer.flush();
         writer.close();
 
-        System.out.println("Finish");
+        System.out.println("\n--- Finished! ---");
 
     }
 
