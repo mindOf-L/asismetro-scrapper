@@ -370,8 +370,8 @@ public class MainCollab {
             case "Martes"    -> { return "M"; }
             case "Miércoles" -> { return "X"; }
             case "Jueves"    -> { return "J"; }
-            case "Viernes"   -> { return "S"; }
-            case "Sábado"    -> { return "V"; }
+            case "Viernes"   -> { return "V"; }
+            case "Sábado"    -> { return "S"; }
             case "Domingo"   -> { return "D"; }
         }
         return "";
