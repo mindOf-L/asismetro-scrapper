@@ -308,7 +308,7 @@ public class MainCollab {
             System.out.println(brother);
 
             // write on file
-            writer.write(String.format("%s,%s,%s,\"%s\",\"%s\",\"%s\",\"%s\"\n",
+            writer.write(String.format("\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"\n",
                     brother.getName(),
                     brother.getEmail(),
                     brother.getPhone(),
